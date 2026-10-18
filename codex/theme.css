@@ -1,0 +1,16 @@
+:root {
+  color-scheme: light dark;
+  --dsw-alias-brand-primary: light-dark(#24292f, #f0f1f3);
+  --dsw-alias-state-success-primary: light-dark(#16783c, #4bce86);
+  --dsw-alias-state-warn-primary: light-dark(#986000, #e9a448);
+  --dsw-alias-state-error-primary: light-dark(#b42332, #fa7a89);
+  --dsw-alias-label-primary: light-dark(#24292f, #eceef1);
+  --dsw-alias-label-secondary: light-dark(#59616c, #a5adb9);
+  --dsw-alias-border-l2: light-dark(#d8dce2, #343940);
+  --dsw-alias-bg-layer-1: light-dark(#fafbfc, #15171b);
+  --dsw-alias-bg-layer-2: light-dark(#edf0f3, #24282f);
+}
+* { box-sizing: border-box; }
+html, body, #root { width:100%; height:100%; margin:0; }
+body { background:var(--dsw-alias-bg-layer-1); color:var(--dsw-alias-label-primary); font-family:system-ui, sans-serif; }
+button, input { font:inherit; }

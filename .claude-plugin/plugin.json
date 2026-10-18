@@ -1,0 +1,11 @@
+{
+  "name": "git-worktree-gui",
+  "version": "0.5.0",
+  "description": "A resident Git worktree pane: bottom-up branch and merge topology, worktree state, changes and file structure, with a status-line summary.",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "LeonZ666"
+  },
+  "repository": "https://github.com/LeonZ666/dsh-gitworktree-gui"
+}

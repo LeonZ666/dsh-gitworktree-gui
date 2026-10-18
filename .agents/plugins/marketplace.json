@@ -1,0 +1,10 @@
+{
+  "name": "local-git-worktree",
+  "interface": { "displayName": "Git 工作树本地插件" },
+  "plugins": [{
+    "name": "git-worktree-panel",
+    "source": { "source": "local", "path": "./codex" },
+    "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+    "category": "Developer Tools"
+  }]
+}

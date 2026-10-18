@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Git Worktree GUI",
+    "description": "A resident git worktree panel: a bottom-up branch and merge topology above, worktree state, changes and file structure below."
+  }
+}

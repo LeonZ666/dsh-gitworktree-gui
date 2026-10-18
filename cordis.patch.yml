@@ -1,0 +1,14 @@
+# Bundle patch: inserts the git worktree panel row into the web profile roster.
+#
+# Both keys are optional:
+#   repo          fallback directory when the request names no Session
+#   allowedRoots  directories an explicit `cwd` may point into (default: your home directory)
+# Set them to absolute paths on your machine; the example below is commented out.
+- insert:
+    - id: dsh-gitworktree-gui
+      name: dsh-gitworktree-gui
+      config: {}
+      # config:
+      #   repo: /absolute/path/to/your/repo
+      #   allowedRoots:
+      #     - /absolute/path/to/your/projects

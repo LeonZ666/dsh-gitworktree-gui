@@ -1,0 +1,13 @@
+{
+  "name": "git-worktree-panel",
+  "version": "0.5.0",
+  "description": "Open a local read-only Git history and worktree panel in Codex.",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Git 工作树",
+    "shortDescription": "在 Codex 右侧面板查看 Git 分支、工作树和改动",
+    "category": "Developer Tools",
+    "defaultPrompt": ["打开当前项目的 Git 工作树面板"]
+  }
+}

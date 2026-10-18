@@ -1,0 +1,11 @@
+{
+  "name": "dsh-gitworktree-gui",
+  "owner": { "name": "LeonZ666" },
+  "plugins": [
+    {
+      "name": "git-worktree-gui",
+      "source": "./",
+      "description": "A resident Git worktree pane: bottom-up topology, worktree state, changes and file structure."
+    }
+  ]
+}

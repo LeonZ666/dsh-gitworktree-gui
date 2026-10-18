@@ -2,13 +2,17 @@
  * dsh-gitworktree-gui — browser half.
  *
  * A git icon resident in the conversation header's right-hand utilities. It
- * opens a right-Sidebar tab split by a horizontal divider:
+ * opens a right-Sidebar tab stacked in three bands:
  *
- *   - top: the commit topology of the repository, drawn bottom-up (the oldest
- *     commit sits at the bottom and history grows upward), trunk and branches
- *     in two colors, the current branch highlighted;
- *   - bottom: the worktrees grouped the way teebe groups them, the dirty
- *     entries of the selected tree, and its file structure.
+ *   - top: the worktree being viewed — path, branch (or detached HEAD),
+ *     ahead/behind, clean / dirty / conflict, and the repository-wide counts;
+ *   - middle: the commit topology of the repository, drawn bottom-up (the
+ *     oldest commit sits at the bottom and history grows upward), trunk and
+ *     branches in two colors, the current branch highlighted;
+ *   - bottom: the detail pane for the clicked commit / branch / worktree,
+ *     then the other worktrees grouped the way teebe groups them (the viewed
+ *     one lives in the top band), the dirty entries of the selected tree, and
+ *     its file structure.
  *
  * Everything rides public seats only (`conversation.session.header.utilities`
  * for the trigger, `sidebarRightTabs` + `sidebar.right.pane.tab` for the pane).
@@ -87,7 +91,32 @@ window.__ModuleLoader__.load({
       'graph.outside': '分支顶点在历史窗口之外',
       'graph.limit': '仅显示最近 {n} 个提交',
       'files.limited': '显示 {shown} / {total} 个文件；搜索仅覆盖已加载文件',
-      'panel.viewing': '正在查看',
+      'bar.title': '当前工作树',
+      'bar.detached': 'detached @ {sha}',
+      'bar.aheadBehind': '↑{ahead} ↓{behind}',
+      'bar.clean': 'clean',
+      'bar.dirty': 'dirty',
+      'bar.conflict': 'conflict',
+      'bar.counts': '本地分支 {local} · 远程分支 {remote} · Worktree {worktrees}',
+      'detail.worktree': '工作树详情',
+      'detail.branch': '分支详情',
+      'detail.path': '路径',
+      'detail.head': 'HEAD',
+      'detail.branchName': '分支',
+      'detail.upstream': '上游分支',
+      'detail.upstreamNone': '未设置上游分支',
+      'detail.track': '领先 / 落后',
+      'detail.status': '状态',
+      'detail.dirtyTotal': '未提交改动',
+      'detail.merged': '已合入主干',
+      'detail.unmerged': '未合入主干',
+      'detail.unknown': '合并状态未知',
+      'detail.currentBranch': '当前分支',
+      'detail.trunkBranch': '主干',
+      'detail.openWorktree': '查看此工作树',
+      'detail.viewCommit': '查看提交',
+      'detail.none': '—',
+      'detail.missing': '该工作树已不在 worktree 列表中',
       'section.worktrees': 'WORKTREES',
       'section.changes': 'CHANGES',
       'section.files': 'FILES',
@@ -101,7 +130,7 @@ window.__ModuleLoader__.load({
       'graph.sharedTip': '尚无独立提交',
       'graph.select': '选择路径：{name}',
       'graph.selected': '已选中 {name}',
-      'graph.clickLine': '点击线条高亮分支路径',
+      'graph.clickLine': '点击线条高亮分支路径并查看详情',
       'graph.clear': '清除高亮',
       'graph.merged': '已合并分支 {sha}',
       'group.missing': '目录已不在',
@@ -121,10 +150,11 @@ window.__ModuleLoader__.load({
       'graph.branch': '分支',
       'graph.current': '当前分支',
       'graph.summary': '{commits} 个提交 · {branches} 个分支',
-      'graph.hint': '点击分支顶点可切换到对应工作树',
+      'graph.hint': '点击提交、分支或工作树节点查看详情',
       'changes.empty': '没有未提交改动',
       'files.empty': '没有可显示的文件',
       'files.search': '搜索文件',
+      'file.open': '在侧边栏打开 {path}',
       'files.more': '仅显示前 {n} 个文件，其余未列出',
       'changes.more': '仅显示前 {n} 条改动，其余未列出',
       'banner.stale': '连接中断，显示的是上一次的数据：{message}',
@@ -182,7 +212,32 @@ window.__ModuleLoader__.load({
       'graph.outside': 'Branch tip outside history window',
       'graph.limit': 'Showing the latest {n} commits',
       'files.limited': 'Showing {shown} / {total} files; search covers loaded files only',
-      'panel.viewing': 'Viewing',
+      'bar.title': 'Current worktree',
+      'bar.detached': 'detached @ {sha}',
+      'bar.aheadBehind': '↑{ahead} ↓{behind}',
+      'bar.clean': 'clean',
+      'bar.dirty': 'dirty',
+      'bar.conflict': 'conflict',
+      'bar.counts': '{local} local · {remote} remote · {worktrees} worktrees',
+      'detail.worktree': 'Worktree details',
+      'detail.branch': 'Branch details',
+      'detail.path': 'Path',
+      'detail.head': 'HEAD',
+      'detail.branchName': 'Branch',
+      'detail.upstream': 'Upstream',
+      'detail.upstreamNone': 'No upstream',
+      'detail.track': 'Ahead / behind',
+      'detail.status': 'State',
+      'detail.dirtyTotal': 'Uncommitted changes',
+      'detail.merged': 'Merged into trunk',
+      'detail.unmerged': 'Not merged into trunk',
+      'detail.unknown': 'Merge state unknown',
+      'detail.currentBranch': 'Current branch',
+      'detail.trunkBranch': 'Trunk',
+      'detail.openWorktree': 'View this worktree',
+      'detail.viewCommit': 'View commit',
+      'detail.none': '—',
+      'detail.missing': 'This worktree is no longer listed',
       'section.worktrees': 'WORKTREES',
       'section.changes': 'CHANGES',
       'section.files': 'FILES',
@@ -196,7 +251,7 @@ window.__ModuleLoader__.load({
       'graph.sharedTip': 'No independent commits',
       'graph.select': 'Select path: {name}',
       'graph.selected': 'Selected {name}',
-      'graph.clickLine': 'Click a line to highlight its branch path',
+      'graph.clickLine': 'Click a line to highlight and inspect its branch path',
       'graph.clear': 'Clear highlight',
       'graph.merged': 'Merged branch {sha}',
       'group.missing': 'Directory gone',
@@ -216,10 +271,11 @@ window.__ModuleLoader__.load({
       'graph.branch': 'branch',
       'graph.current': 'current branch',
       'graph.summary': '{commits} commits · {branches} branches',
-      'graph.hint': 'Click a branch tip to switch to its worktree',
+      'graph.hint': 'Click a commit, branch or worktree node for details',
       'changes.empty': 'No uncommitted changes',
       'files.empty': 'No files to show',
       'files.search': 'Search files',
+      'file.open': 'Open {path} in the sidebar',
       'files.more': 'Showing the first {n} files; the rest are not listed',
       'changes.more': 'Showing the first {n} changes; the rest are not listed',
       'banner.stale': 'Connection lost, showing the last data: {message}',
@@ -261,9 +317,29 @@ window.__ModuleLoader__.load({
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; flex:1 1 auto; }
 .gw-spacer { flex:1 1 auto; }
 .gw-head > svg, .gw-head > button { flex-shrink:0; }
-.gw-context { display:flex; align-items:center; gap:8px; padding:0 12px 6px; min-width:0; }
-.gw-context-path { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:10px; color:var(--dsw-alias-label-secondary); }
-.gw-context .gw-btn { flex-shrink:0; }
+/* Top band: the current worktree, always visible above the graph. */
+.gw-wtbar { flex:0 0 auto; display:flex; flex-direction:column; gap:3px; padding:0 12px 7px;
+  min-width:0; border-bottom:1px solid var(--dsw-alias-border-l2); }
+.gw-wtbar-row { display:flex; align-items:center; gap:6px; min-width:0; flex-wrap:wrap; }
+.gw-wtbar-label { flex:0 0 auto; font-size:10px; color:var(--dsw-alias-label-secondary); opacity:.75;
+  letter-spacing:.04em; }
+.gw-wtbar-path { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:10px;
+  color:var(--dsw-alias-label-secondary); direction:rtl; text-align:left; }
+.gw-wtbar .gw-btn { flex-shrink:0; }
+.gw-branchchip { min-width:0; max-width:100%; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:11px; color:var(--dsw-alias-label-primary); border:1px solid var(--dsw-alias-border-l2);
+  border-radius:5px; padding:0 6px; line-height:18px; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; }
+.gw-wtstate { flex:0 0 auto; font-size:10px; line-height:18px; padding:0 6px; border-radius:5px;
+  border:1px solid currentColor; }
+.gw-wtstate.is-clean { color:var(--dsw-alias-state-success-primary); }
+.gw-wtstate.is-dirty { color:var(--dsw-alias-state-warn-primary); }
+.gw-wtstate.is-conflict { color:var(--dsw-alias-state-error-primary); }
+.gw-track { flex:0 0 auto; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:10px;
+  color:var(--dsw-alias-label-secondary); white-space:nowrap; }
+.gw-wtbar-counts { font-size:10px; color:var(--dsw-alias-label-secondary); opacity:.8; overflow:hidden;
+  text-overflow:ellipsis; white-space:nowrap; }
 .gw-limit { padding:5px 12px; font-size:10px; color:var(--dsw-alias-label-secondary); border-bottom:1px solid var(--dsw-alias-border-l2); }
 @container (max-width: 420px) {
   .gw-head { flex-wrap:wrap; gap:6px; }
@@ -274,8 +350,8 @@ window.__ModuleLoader__.load({
   .gw-legend { right:12px; gap:8px; }
   .gw-legend span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .gw-legend span:last-child { flex:1; }
-  .gw-context { flex-wrap:wrap; }
-  .gw-context-path { flex-basis:100%; }
+  .gw-wtbar-row { flex-wrap:wrap; }
+  .gw-wtbar-path { flex-basis:100%; order:9; }
 }
 .gw-live { display:inline-flex; align-items:center; gap:4px; color:var(--dsw-alias-label-secondary);
   font-size:10px; opacity:.85; white-space:nowrap; }
@@ -344,6 +420,12 @@ window.__ModuleLoader__.load({
 .gw-branch-card p { margin:3px 0; overflow-wrap:anywhere; }
 .gw-branch-card small { color:var(--dsw-alias-label-secondary); }
 .gw-detail { padding:10px 12px; }
+.gw-detail-rows { display:grid; grid-template-columns:auto minmax(0, 1fr); gap:3px 10px; margin:8px 0;
+  font-size:11px; }
+.gw-detail-rows dt { color:var(--dsw-alias-label-secondary); white-space:nowrap; }
+.gw-detail-rows dd { margin:0; overflow-wrap:anywhere; }
+.gw-detail-rows dd .gw-chip { margin-right:4px; }
+.gw-detail-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
 .gw-detail-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; }
 .gw-detail-head strong { font-size:12px; }
 .gw-detail-meta { color:var(--dsw-alias-label-secondary); font-size:10px; overflow-wrap:anywhere; }
@@ -435,6 +517,8 @@ window.__ModuleLoader__.load({
 .gw-chips { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; }
 
 .gw-change { display:flex; align-items:center; gap:8px; padding:3px 12px; }
+.gw-change.is-openable { cursor:pointer; }
+.gw-change:focus-visible { outline:1px solid var(--dsw-alias-brand-primary); outline-offset:-1px; }
 .gw-change:hover { background:var(--dsw-alias-bg-layer-1); }
 .gw-status { width:16px; flex:0 0 auto; text-align:center; font-family:ui-monospace, Menlo, monospace;
   font-size:10.5px; font-weight:600; border-radius:4px; line-height:15px; }
@@ -461,6 +545,7 @@ window.__ModuleLoader__.load({
 .gw-file-row { display:flex; align-items:center; gap:6px; padding:1.5px 6px; border-radius:5px;
   font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:11px; cursor:default; }
 .gw-file-row:hover { background:var(--dsw-alias-bg-layer-1); }
+.gw-file-row.is-openable { cursor:pointer; }
 .gw-file-row.is-dir { cursor:pointer; color:var(--dsw-alias-label-secondary); }
 .gw-file-row:focus-visible, .gw-tree:focus-visible, .gw-divider:focus-visible, .gw-node:focus-visible { outline:1px solid var(--dsw-alias-brand-primary); outline-offset:-1px; }
 .gw-file-row .gw-twist { width:9px; font-size:8px; opacity:.65; flex:0 0 auto; }
@@ -490,6 +575,21 @@ window.__ModuleLoader__.load({
       try {
         console.warn(`[dsh-gitworktree-gui] ${where}`, error)
       } catch {}
+    }
+
+    /** The `dsh-resource://file/session/<id>/<absolute path>` address of a file. */
+    function fileAddress(sessionId, absolutePath) {
+      const segment = (part) => encodeURIComponent(part).replace(/%3A/gi, ':')
+      const normalized = String(absolutePath).replace(/\\/g, '/').replace(/^(?:\.\/)+/, '')
+      return `dsh-resource://file/session/${segment(String(sessionId))}/${normalized.split('/').map(segment).join('/')}`
+    }
+
+    /** One repository-relative path resolved against the worktree it belongs to. */
+    function absoluteFile(root, path) {
+      if (typeof root !== 'string' || root === '') return ''
+      if (typeof path !== 'string' || path === '') return ''
+      if (path.startsWith('/')) return path
+      return `${root.replace(/\\/g, '/').replace(/\/+$/, '')}/${path.replace(/^(?:\.\/)+/, '')}`
     }
 
     /** The files an untracked directory entry (`dir/`) or a plain path covers. */
@@ -611,17 +711,31 @@ window.__ModuleLoader__.load({
       return h('span', { className: `gw-chip${tone ? ` is-${tone}` : ''}`, key }, label)
     }
 
-    /** The dirty breakdown + ahead/behind of one tree. */
-    function treeChips(t, tree) {
+    /** The dirty breakdown of one tree (no tracking counts). */
+    function dirtyChips(t, tree) {
       const dirty = tree.dirty ?? {}
       const chips = []
       if (dirty.staged > 0) chips.push(chip('staged', `${t('dirty.staged')} ${dirty.staged}`, 'warn'))
       if (dirty.modified > 0) chips.push(chip('modified', `${t('dirty.modified')} ${dirty.modified}`, 'warn'))
       if (dirty.untracked > 0) chips.push(chip('untracked', `${t('dirty.untracked')} ${dirty.untracked}`, 'warn'))
       if (dirty.conflicted > 0) chips.push(chip('conflicted', `${t('dirty.conflicted')} ${dirty.conflicted}`, 'err'))
+      return chips
+    }
+
+    /** The dirty breakdown + ahead/behind of one tree. */
+    function treeChips(t, tree) {
+      const chips = dirtyChips(t, tree)
       if (tree.ahead > 0) chips.push(chip('ahead', `${t('tree.ahead')} ${tree.ahead}`))
       if (tree.behind > 0) chips.push(chip('behind', `${t('tree.behind')} ${tree.behind}`))
       return chips
+    }
+
+    /** clean / dirty / conflict, the three states the top band reports. */
+    function treeState(tree) {
+      if (tree === undefined) return { label: 'bar.clean', tone: 'clean' }
+      if ((tree.dirty?.conflicted ?? 0) > 0) return { label: 'bar.conflict', tone: 'conflict' }
+      if (dirtyTotal(tree) > 0 || tree.statusNote === 'status failed') return { label: 'bar.dirty', tone: 'dirty' }
+      return { label: 'bar.clean', tone: 'clean' }
     }
 
     /** One worktree row in the WORKTREES section. */
@@ -767,6 +881,18 @@ window.__ModuleLoader__.load({
         const name = railByLane.get(lane)?.name ?? String(lane)
         return name.startsWith('merged:') ? t('graph.merged', { sha: name.slice(7) }) : name
       }
+      const inspectWorktree = (path) => {
+        if (typeof props.onInspectWorktree === 'function') props.onInspectWorktree(path)
+      }
+      const inspectBranchName = (name) => {
+        if (typeof props.onInspectBranch === 'function' && typeof name === 'string' && name !== '') {
+          props.onInspectBranch(name)
+        }
+      }
+      const inspectBranch = (lane) => {
+        const name = lane === 0 ? props.trunkBranch : railByLane.get(lane)?.name
+        if (typeof name === 'string' && !name.startsWith('merged:')) inspectBranchName(name)
+      }
       const trunkTip = (props.branches ?? []).find(branch => branch.isTrunk)?.sha
       const trunkReachable = new Set()
       const queue = trunkTip ? [trunkTip] : []
@@ -821,7 +947,7 @@ window.__ModuleLoader__.load({
         return h('g', {
           key: `segment-${key}`, className: 'gw-segment', role: 'button', tabIndex: 0,
           'aria-label': t('graph.select', { name: nameOf(lane) }), 'aria-pressed': selected,
-          'data-rail': keyOf(lane), onClick: () => select(lane),
+          'data-rail': keyOf(lane), onClick: () => { select(lane); inspectBranch(lane) },
           onPointerEnter: event => showBranch(lane, event), onPointerLeave: hideBranch,
           onFocus: event => showBranch(lane, event), onBlur: hideBranch,
           onKeyDown: event => {
@@ -884,6 +1010,12 @@ window.__ModuleLoader__.load({
         const note = t(rail.outOfWindow ? 'graph.outside' : 'graph.sharedTip')
         const current = rail.name === currentBranch
         const target = worktreeByBranch.get(rail.name)
+        const knownBranch = (props.branches ?? []).some(branch => branch.name === rail.name)
+        const inspectRef = target === undefined && knownBranch
+        const activate = target
+          ? () => { inspectWorktree(target.path); onPick(target.path) }
+          : inspectRef ? () => inspectBranchName(rail.name)
+            : undefined
         const refPath = anchor
           ? connection(x(anchor.lane), y(anchor.row), x(rail.lane), cy, true)
           : `M${x(rail.lane)} ${cy + 28}L${x(rail.lane)} ${cy}`
@@ -895,15 +1027,15 @@ window.__ModuleLoader__.load({
           onFocus: event => showBranch(rail.lane, event), onBlur: hideBranch,
           className: `gw-ref-tip${current ? ' is-current' : ''}`,
           'aria-label': `${rail.name}${current ? ' HEAD' : ''} · ${note}`,
-          role: target ? 'button' : 'group',
+          role: activate === undefined ? 'group' : 'button',
           tabIndex: 0,
-          onClick: target ? () => onPick(target.path) : undefined,
-          onKeyDown: target ? event => {
+          onClick: activate,
+          onKeyDown: activate === undefined ? undefined : event => {
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault()
-              onPick(target.path)
+              activate()
             }
-          } : undefined,
+          },
         },
         h('title', {}, `${rail.name} · ${note}`),
         h('circle', { className: 'gw-ref-end', cx: x(rail.lane), cy, r: 4 }),
@@ -973,11 +1105,12 @@ window.__ModuleLoader__.load({
                 onPointerEnter: event => showBranch((graph.rails ?? []).find(rail => rail.name === ref.name)?.lane ?? node.lane, event),
                 onPointerLeave: hideBranch,
                 onFocus: event => showBranch((graph.rails ?? []).find(rail => rail.name === ref.name)?.lane ?? node.lane, event), onBlur: hideBranch,
-                onClick: event => { event.stopPropagation(); const tree = worktreeByBranch.get(ref.name); if (tree) onPick(tree.path) },
+                onClick: event => { event.stopPropagation(); const tree = worktreeByBranch.get(ref.name); if (tree) { inspectWorktree(tree.path); onPick(tree.path) } else inspectBranchName(ref.name) },
                 onKeyDown: event => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault(); event.stopPropagation()
-                    const tree = worktreeByBranch.get(ref.name); if (tree) onPick(tree.path)
+                    const tree = worktreeByBranch.get(ref.name)
+                    if (tree) { inspectWorktree(tree.path); onPick(tree.path) } else inspectBranchName(ref.name)
                   }
                 },
               },
@@ -1091,11 +1224,26 @@ window.__ModuleLoader__.load({
 
     /** One file/folder row, recursive. */
     function FileNode(props) {
-      const { node, depth, collapsed, onToggle, changed, t } = props
+      const { node, depth, collapsed, onToggle, changed, t, onOpen } = props
       if (node.type === 'file') {
+        const openable = typeof onOpen === 'function'
         return h(
           'div',
-          { className: 'gw-file-row', style: { paddingLeft: 6 + depth * 12 }, title: node.path },
+          {
+            className: `gw-file-row${openable ? ' is-openable' : ''}`,
+            style: { paddingLeft: 6 + depth * 12 },
+            title: node.path,
+            role: openable ? 'button' : undefined,
+            tabIndex: openable ? 0 : undefined,
+            'aria-label': openable ? t('file.open', { path: node.path }) : undefined,
+            onClick: openable ? () => onOpen(node.path) : undefined,
+            onKeyDown: openable ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                onOpen(node.path)
+              }
+            } : undefined,
+          },
           h('span', { className: 'gw-twist' }),
           h('span', { className: 'gw-fname' }, node.name),
           isChanged(changed, node.path) ? h('span', { className: 'gw-changed' }) : null,
@@ -1136,6 +1284,7 @@ window.__ModuleLoader__.load({
                 onToggle,
                 changed,
                 searching: props.searching,
+                onOpen,
                 t,
               }),
             ),
@@ -1231,6 +1380,110 @@ window.__ModuleLoader__.load({
       )
     }
 
+    /** Flatten `[label, value]` pairs into `<dt>`/`<dd>` children. */
+    function detailRows(entries) {
+      const out = []
+      entries.forEach(([label, value], index) => {
+        out.push(h('dt', { key: `k${index}` }, label))
+        out.push(h('dd', { key: `v${index}` }, value))
+      })
+      return out
+    }
+
+    /** Shared frame of the bottom detail pane. */
+    function DetailShell(props) {
+      return h(
+        'section',
+        { className: 'gw-detail', 'aria-label': props.title },
+        h(
+          'div',
+          { className: 'gw-detail-head' },
+          h('strong', {}, props.title),
+          h('button', { type: 'button', className: 'gw-btn', onClick: props.onClose }, props.t('detail.close')),
+        ),
+        props.children,
+      )
+    }
+
+    /** A linked worktree: path, branch/detached HEAD, upstream, tracking and dirt. */
+    function WorktreeDetails(props) {
+      const { t, tree, onClose, onSwitch, onInspectCommit } = props
+      if (tree === undefined || tree === null) {
+        return h(DetailShell, { t, title: t('detail.worktree'), onClose },
+          h('p', { className: 'gw-empty' }, t('detail.missing')))
+      }
+      const total = dirtyTotal(tree)
+      const state = treeState(tree)
+      const branch = tree.detached
+        ? t('bar.detached', { sha: tree.short ?? (typeof tree.head === 'string' ? tree.head.slice(0, 7) : '') })
+        : tree.branch ?? t('detail.none')
+      const head = [tree.short, tree.lastCommit?.subject]
+        .filter((part) => typeof part === 'string' && part !== '')
+        .join(' · ')
+      const actions = []
+      if (typeof onSwitch === 'function' && tree.isSelected !== true && tree.exists !== false) {
+        actions.push(h('button', { key: 'switch', type: 'button', className: 'gw-btn', onClick: () => onSwitch(tree.path) }, t('detail.openWorktree')))
+      }
+      if (typeof onInspectCommit === 'function' && typeof tree.head === 'string' && tree.head !== '') {
+        actions.push(h('button', { key: 'commit', type: 'button', className: 'gw-btn', onClick: () => onInspectCommit(tree.head) }, t('detail.viewCommit')))
+      }
+      return h(DetailShell, { t, title: t('detail.worktree'), onClose },
+        h('dl', { className: 'gw-detail-rows' }, detailRows([
+          [t('detail.path'), tree.path],
+          [t('detail.branchName'), branch],
+          [t('detail.head'), head === '' ? t('detail.none') : head],
+          [t('detail.upstream'), tree.upstream ?? t('detail.upstreamNone')],
+          [t('detail.track'), t('bar.aheadBehind', { ahead: tree.ahead ?? 0, behind: tree.behind ?? 0 })],
+          [t('detail.dirtyTotal'), String(total)],
+          [t('detail.status'), [
+            h('span', { key: 'state', className: `gw-wtstate is-${state.tone}` }, t(state.label)),
+            ...dirtyChips(t, tree),
+          ]],
+        ])),
+        actions.length === 0 ? null : h('div', { className: 'gw-detail-actions' }, actions),
+      )
+    }
+
+    /** One branch: tip commit, upstream, tracking, linked worktree and merge state. */
+    function BranchDetails(props) {
+      const { t, branch, tree, node, onClose, onSwitch, onInspectCommit } = props
+      if (branch === undefined || branch === null) {
+        return h(DetailShell, { t, title: t('detail.branch'), onClose },
+          h('p', { className: 'gw-empty' }, t('detail.none')))
+      }
+      const tip = typeof branch.sha === 'string' ? branch.sha : ''
+      const head = node
+        ? [node.short, node.subject].filter((part) => typeof part === 'string' && part !== '').join(' · ')
+        : tip.slice(0, 7)
+      const chips = []
+      if (branch.isCurrent) chips.push(h('span', { key: 'current', className: 'gw-chip is-brand' }, t('detail.currentBranch')))
+      if (branch.isTrunk) chips.push(h('span', { key: 'trunk', className: 'gw-chip is-brand' }, t('detail.trunkBranch')))
+      const merged = tree !== undefined && tree !== null ? tree.merged : branch.isTrunk ? true : undefined
+      chips.push(h('span', { key: 'merged', className: `gw-chip${merged === false ? ' is-warn' : ''}` },
+        t(merged === true ? 'detail.merged' : merged === false ? 'detail.unmerged' : 'detail.unknown')))
+      const actions = []
+      if (tree !== undefined && tree !== null && typeof onSwitch === 'function' && tree.isSelected !== true && tree.exists !== false) {
+        actions.push(h('button', { key: 'switch', type: 'button', className: 'gw-btn', onClick: () => onSwitch(tree.path) }, t('detail.openWorktree')))
+      }
+      if (tip !== '' && typeof onInspectCommit === 'function') {
+        actions.push(h('button', { key: 'commit', type: 'button', className: 'gw-btn', onClick: () => onInspectCommit(tip) }, t('detail.viewCommit')))
+      }
+      return h(DetailShell, { t, title: t('detail.branch'), onClose },
+        h('dl', { className: 'gw-detail-rows' }, detailRows([
+          [t('detail.branchName'), branch.name],
+          [t('detail.head'), head === '' ? t('detail.none') : head],
+          [t('detail.upstream'), branch.upstream ?? t('detail.upstreamNone')],
+          [t('detail.track'), branch.upstream
+            ? t('bar.aheadBehind', { ahead: branch.ahead ?? 0, behind: branch.behind ?? 0 })
+            : t('detail.none')],
+          [t('detail.path'), tree !== undefined && tree !== null ? tree.path : t('detail.none')],
+          [t('detail.dirtyTotal'), tree !== undefined && tree !== null ? String(dirtyTotal(tree)) : t('detail.none')],
+          [t('detail.status'), chips],
+        ])),
+        actions.length === 0 ? null : h('div', { className: 'gw-detail-actions' }, actions),
+      )
+    }
+
     /** The right-Sidebar pane. */
     function Panel(props) {
       const t = props.t
@@ -1249,7 +1502,7 @@ window.__ModuleLoader__.load({
       const [collapsed, setCollapsed] = React.useState({ worktrees: false, changes: false, files: false })
       const [dirs, setDirs] = React.useState(() => new Set())
       const [search, setSearch] = React.useState('')
-      const [inspectedCommit, setInspectedCommit] = React.useState(null)
+      const [inspection, setInspection] = React.useState(null)
       const detailScope = `${sessionId}:${selectedPath}`
       const bodyRef = React.useRef(null)
       const topRef = React.useRef(null)
@@ -1358,7 +1611,6 @@ window.__ModuleLoader__.load({
 
       const pick = React.useMemo(
         () => (path) => {
-          setInspectedCommit(null)
           if (typeof path !== 'string' || path === '') return
           try {
             localStorage.setItem(storeKey, path)
@@ -1369,8 +1621,25 @@ window.__ModuleLoader__.load({
         [storeKey],
       )
 
+      // Inspection is the bottom detail pane; switching the viewer and showing
+      // a detail are separate actions, so a graph tip can do both.
+      const inspectWorktree = (path) => {
+        if (typeof path !== 'string' || path === '') return
+        setInspection({ kind: 'worktree', path, scope: `${sessionId}:${path}` })
+      }
+      const selectWorktree = (path) => {
+        inspectWorktree(path)
+        pick(path)
+      }
+      const inspectBranch = (name) => {
+        if (typeof name === 'string' && name !== '') setInspection({ kind: 'branch', name, scope: detailScope })
+      }
+      const inspectCommit = (sha) => {
+        if (typeof sha === 'string' && sha !== '') setInspection({ kind: 'commit', sha, scope: detailScope })
+      }
+
       const returnToSession = () => {
-        setInspectedCommit(null)
+        setInspection(null)
         try { localStorage.removeItem(storeKey) } catch {}
         setSelectedPath('')
         setNonce(value => value + 1)
@@ -1413,6 +1682,7 @@ window.__ModuleLoader__.load({
       const worktrees = Array.isArray(data?.worktrees) ? data.worktrees : NONE
       const changes = Array.isArray(data?.changes) ? data.changes : NONE
       const files = Array.isArray(data?.files) ? data.files : NONE
+      const branches = Array.isArray(data?.branches) ? data.branches : NONE
       const changedSet = React.useMemo(
         () => new Set(changes.map((change) => String(change.path).replace(/\/$/, ''))),
         [changes],
@@ -1424,6 +1694,16 @@ window.__ModuleLoader__.load({
         return buildFileTree(files.filter((path) => path.toLowerCase().includes(needle)))
       }, [fileTree, files, search])
 
+      // Clicking a file opens it in the Sidebar's document preview (one tab per file).
+      const openFile = typeof props.openFile === 'function' ? props.openFile : undefined
+      const rootPath = typeof data?.repoRoot === 'string' && data.repoRoot !== '' ? data.repoRoot : data?.cwd
+      const openPath = openFile === undefined
+        ? undefined
+        : (path) => {
+            const absolute = absoluteFile(rootPath, path)
+            if (absolute !== '') openFile(absolute)
+          }
+
       const repoName = (() => {
         const root = typeof data?.repoRoot === 'string' ? data.repoRoot : ''
         const parts = root.split('/').filter(Boolean)
@@ -1432,8 +1712,64 @@ window.__ModuleLoader__.load({
       const updated = relative(data?.generatedAt, t)
       const graphSummary = t('graph.summary', {
         commits: Array.isArray(data?.graph?.nodes) ? data.graph.nodes.length : 0,
-        branches: Array.isArray(data?.branches) ? data.branches.length : 0,
+        branches: branches.length,
       })
+
+      // Top band: the worktree being viewed, its state, and the global counts.
+      const currentTree = worktrees.find((tree) => tree.isSelected === true) ?? worktrees[0]
+      // The viewed worktree lives in the top band, not in the bottom list.
+      const otherTrees = worktrees.filter((tree) => tree.path !== currentTree?.path)
+      const currentState = treeState(currentTree)
+      const currentBranchLabel = currentTree === undefined
+        ? (typeof data?.currentBranch === 'string' && data.currentBranch !== '' ? data.currentBranch : t('detail.none'))
+        : currentTree.detached
+          ? t('bar.detached', { sha: currentTree.short ?? (typeof currentTree.head === 'string' ? currentTree.head.slice(0, 7) : '') })
+          : currentTree.branch ?? t('detail.none')
+      const currentPath = currentTree?.path ?? data?.cwd ?? selectedPath
+      const countsLabel = t('bar.counts', {
+        local: branches.length,
+        remote: typeof data?.remoteBranchCount === 'number' ? data.remoteBranchCount : 0,
+        worktrees: worktrees.length,
+      })
+      const nodeOf = (sha) => (Array.isArray(data?.graph?.nodes) ? data.graph.nodes : NONE)
+        .find((node) => node.sha === sha)
+      const branchOf = (name) => branches.find((branch) => branch.name === name)
+      const treeOfBranch = (name) => worktrees.find((tree) => tree.branch === name)
+
+      const wtbar = h(
+        'div',
+        { className: 'gw-wtbar' },
+        h(
+          'div',
+          { className: 'gw-wtbar-row' },
+          h('span', { className: 'gw-wtbar-label' }, t('bar.title')),
+          h('span', { className: 'gw-wtbar-path', title: currentPath }, currentPath === '' ? t('panel.loading') : currentPath),
+          selectedPath !== '' ? h('button', {
+            type: 'button', className: 'gw-btn', onClick: returnToSession,
+            title: t('action.session'),
+          }, t('action.session')) : null,
+        ),
+        data?.ok === true ? h(
+          'div',
+          { className: 'gw-wtbar-row' },
+          h('span', { className: 'gw-branchchip', title: currentTree?.detached && typeof currentTree.head === 'string' ? currentTree.head : currentBranchLabel }, currentBranchLabel),
+          currentTree?.isMain ? h('span', { className: 'gw-chip' }, t('badge.main')) : null,
+          h('span', { className: `gw-wtstate is-${currentState.tone}`, title: currentTree?.statusNote ?? '' },
+            t(currentState.label)),
+          h('span', { className: 'gw-track', title: t('detail.track') },
+            t('bar.aheadBehind', { ahead: currentTree?.ahead ?? 0, behind: currentTree?.behind ?? 0 })),
+        ) : null,
+        data?.ok === true ? h(
+          'div',
+          { className: 'gw-wtbar-row' },
+          currentTree === undefined ? null : dirtyChips(t, currentTree),
+          h('span', {
+            className: 'gw-wtbar-counts',
+            title: countsLabel,
+            style: currentTree === undefined || dirtyTotal(currentTree) === 0 ? undefined : { marginLeft: 'auto' },
+          }, countsLabel),
+        ) : null,
+      )
 
       const groups = [
         { key: 'uncommitted', label: t('group.uncommitted') },
@@ -1444,11 +1780,11 @@ window.__ModuleLoader__.load({
         { key: 'missing', label: t('group.missing') },
         { key: 'other', label: t('group.other') },
       ]
-      const mainTrees = worktrees.filter((tree) => tree.group === 'root')
+      const mainTrees = otherTrees.filter((tree) => tree.group === 'root')
       const grouped = groups
         .map((group) => ({
           ...group,
-          trees: worktrees.filter((tree) => tree.group === group.key),
+          trees: otherTrees.filter((tree) => tree.group === group.key),
         }))
         .filter((group) => group.trees.length > 0)
 
@@ -1488,14 +1824,7 @@ window.__ModuleLoader__.load({
           '⟳',
         ),
       ),
-        h('div', { className: 'gw-context' },
-          h('span', { className: 'gw-context-path', title: data?.cwd ?? selectedPath },
-            `${t('panel.viewing')} · ${data?.cwd ?? selectedPath}`),
-          selectedPath !== '' ? h('button', {
-            type: 'button', className: 'gw-btn', onClick: returnToSession,
-            title: t('action.session'),
-          }, t('action.session')) : null,
-        ),
+        data !== undefined || selectedPath !== '' ? wtbar : null,
         data?.graph?.truncated ? h('div', { className: 'gw-limit' }, t('graph.limit', { n: data.graph.limit })) : null,
       )
 
@@ -1537,7 +1866,9 @@ window.__ModuleLoader__.load({
               )
             : h(Graph, {
                 key: data?.commonDir ?? data?.repoRoot,
-                onCommit: sha => setInspectedCommit({ sha, scope: detailScope }),
+                onCommit: inspectCommit,
+                onInspectBranch: inspectBranch,
+                onInspectWorktree: inspectWorktree,
                 graph: data?.graph,
                 branches: data?.branches,
                 trunkBranch: data?.trunkBranch,
@@ -1558,42 +1889,45 @@ window.__ModuleLoader__.load({
         )
       }
 
-      bottomParts.push(
-        h(
-          Section,
-          {
-            key: 'worktrees',
-            title: t('section.worktrees'),
-            count: worktrees.length,
-            collapsed: collapsed.worktrees,
-            onToggle: () => setCollapsed((value) => ({ ...value, worktrees: !value.worktrees })),
-          },
+      // The viewed worktree is the top band; only the others remain here.
+      if (otherTrees.length > 0) {
+        bottomParts.push(
           h(
-            'div',
-            { className: 'gw-repo' },
-            h('div', { className: 'gw-repo-name' }, repoName),
+            Section,
+            {
+              key: 'worktrees',
+              title: t('section.worktrees'),
+              count: otherTrees.length,
+              collapsed: collapsed.worktrees,
+              onToggle: () => setCollapsed((value) => ({ ...value, worktrees: !value.worktrees })),
+            },
             h(
               'div',
-              { className: 'gw-repo-note' },
-              `${t('note.worktrees', { n: worktrees.length })} · ${t('note.sharedGit')}`,
-            ),
-          ),
-          mainTrees.map((tree) => h(TreeRow, { key: tree.path, t, tree, onPick: pick })),
-          grouped.map((group) =>
-            h(
-              'div',
-              { className: 'gw-group', key: group.key },
+              { className: 'gw-repo' },
+              h('div', { className: 'gw-repo-name' }, repoName),
               h(
                 'div',
-                { className: 'gw-group-head' },
-                h('span', {}, group.label),
-                h('span', { className: 'gw-count' }, String(group.trees.length)),
+                { className: 'gw-repo-note' },
+                `${t('note.worktrees', { n: worktrees.length })} · ${t('note.sharedGit')}`,
               ),
-              group.trees.map((tree) => h(TreeRow, { key: tree.path, t, tree, onPick: pick })),
+            ),
+            mainTrees.map((tree) => h(TreeRow, { key: tree.path, t, tree, onPick: selectWorktree })),
+            grouped.map((group) =>
+              h(
+                'div',
+                { className: 'gw-group', key: group.key },
+                h(
+                  'div',
+                  { className: 'gw-group-head' },
+                  h('span', {}, group.label),
+                  h('span', { className: 'gw-count' }, String(group.trees.length)),
+                ),
+                group.trees.map((tree) => h(TreeRow, { key: tree.path, t, tree, onPick: selectWorktree })),
+              ),
             ),
           ),
-        ),
-      )
+        )
+      }
 
       bottomParts.push(
         h(
@@ -1609,9 +1943,24 @@ window.__ModuleLoader__.load({
             ? h('div', { className: 'gw-empty' }, t('changes.empty'))
             : changes.map((change, index) => {
                 const badge = changeBadge(change)
+                const openable = typeof openPath === 'function' && !change.path.endsWith('/')
                 return h(
                   'div',
-                  { className: 'gw-change', key: `${index}-${change.path}` },
+                  {
+                    className: `gw-change${openable ? ' is-openable' : ''}`,
+                    key: `${index}-${change.path}`,
+                    role: openable ? 'button' : undefined,
+                    tabIndex: openable ? 0 : undefined,
+                    title: openable ? change.path : undefined,
+                    'aria-label': openable ? t('file.open', { path: change.path }) : undefined,
+                    onClick: openable ? () => openPath(change.path) : undefined,
+                    onKeyDown: openable ? (event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        openPath(change.path)
+                      }
+                    } : undefined,
+                  },
                   h('span', { className: `gw-status is-${badge.tone}` }, badge.label),
                   h('span', { className: 'gw-file', title: change.path }, change.path),
                 )
@@ -1663,6 +2012,7 @@ window.__ModuleLoader__.load({
                       }),
                     changed: changedSet,
                     searching: search.trim() !== '',
+                    onOpen: openPath,
                     t,
                   }),
                 ),
@@ -1672,6 +2022,45 @@ window.__ModuleLoader__.load({
             : null,
         ),
       )
+
+      // Bottom detail pane: the clicked node, above the remaining sections.
+      const detailQuery = new URLSearchParams(
+        selectedPath !== '' ? { cwd: selectedPath } : sessionId !== '' ? { session: sessionId } : {},
+      ).toString()
+      let detail = null
+      if (inspection !== null && inspection.scope === detailScope && data?.ok === true) {
+        const close = () => setInspection(null)
+        if (inspection.kind === 'commit') {
+          detail = h(CommitDetails, {
+            key: `${detailScope}:commit:${inspection.sha}`,
+            sha: inspection.sha,
+            query: detailQuery,
+            t,
+            onClose: close,
+          })
+        } else if (inspection.kind === 'worktree') {
+          detail = h(WorktreeDetails, {
+            key: `worktree:${inspection.path}`,
+            t,
+            tree: worktrees.find((tree) => tree.path === inspection.path),
+            onSwitch: selectWorktree,
+            onInspectCommit: inspectCommit,
+            onClose: close,
+          })
+        } else if (inspection.kind === 'branch') {
+          const branch = branchOf(inspection.name)
+          detail = h(BranchDetails, {
+            key: `branch:${inspection.name}`,
+            t,
+            branch,
+            tree: treeOfBranch(inspection.name),
+            node: branch === undefined ? undefined : nodeOf(branch.sha),
+            onSwitch: selectWorktree,
+            onInspectCommit: inspectCommit,
+            onClose: close,
+          })
+        }
+      }
 
       return h(
         'div',
@@ -1712,11 +2101,7 @@ window.__ModuleLoader__.load({
             },
             h('i', {}),
           ),
-          h('div', { className: 'gw-bottom' }, inspectedCommit?.scope === detailScope && data?.ok === true
-            ? h(CommitDetails, { key: `${detailScope}:${inspectedCommit.sha}`, sha: inspectedCommit.sha,
-                query: new URLSearchParams(selectedPath !== '' ? { cwd: selectedPath } : sessionId !== '' ? { session: sessionId } : {}).toString(),
-                t, onClose: () => setInspectedCommit(null) })
-            : bottomParts),
+          h('div', { className: 'gw-bottom' }, detail, bottomParts),
         ),
       )
     }
@@ -1762,6 +2147,17 @@ window.__ModuleLoader__.load({
         }
       }
 
+      /** Open one absolute file through the Sidebar's resource registry (document preview). */
+      const openFile = (sessionId, absolutePath) => {
+        if (typeof absolutePath !== 'string' || absolutePath === '') return
+        if (typeof ctx.sidebarRight?.openResource !== 'function') return
+        try {
+          ctx.sidebarRight.openResource(fileAddress(sessionId, absolutePath))
+        } catch (error) {
+          warn('open file', error)
+        }
+      }
+
       try {
         ctx.effect(
           () =>
@@ -1786,7 +2182,13 @@ window.__ModuleLoader__.load({
                   name: 'sidebar.right.pane.tab',
                   key: PLUGIN_ID,
                   locale: NS,
-                  inject: (sessionId) => ({ t, sessionId }),
+                  inject: (sessionId) => ({
+                    t,
+                    sessionId,
+                    openFile: typeof ctx.sidebarRight?.openResource === 'function'
+                      ? (absolutePath) => openFile(sessionId, absolutePath)
+                      : undefined,
+                  }),
                 },
                 Panel,
               ),
@@ -1846,6 +2248,6 @@ window.__ModuleLoader__.load({
 
     // `components` is exposed so the render smoke test can mount the pane without
     // going through the app shell; the loader ignores it.
-    return { inject, apply, components: { Trigger, Panel, TabTitle, Graph, Section, TreeRow, FileNode, CommitDetails } }
+    return { inject, apply, components: { Trigger, Panel, TabTitle, Graph, Section, TreeRow, FileNode, CommitDetails, WorktreeDetails, BranchDetails, DetailShell } }
   },
 })

@@ -106,3 +106,53 @@ test('the header trigger opens the pane kind the tab type declares', () => {
   trigger.inject('s1').open()
   assert.deepEqual(opened, ['gitworktree-gui'])
 })
+
+test('the tab body opens clicked files through the Sidebar resource registry', () => {
+  const plugin = loadClient()
+  const opened = []
+  let body
+  const ctx = {
+    effect: run => run(),
+    locale: { register: () => {}, bind: () => key => key },
+    slots: {
+      inject: (_name, run) => run(),
+      register: (definition) => {
+        if (definition.name === 'sidebar.right.pane.tab') body = definition
+        return () => {}
+      },
+    },
+    sidebarRightTabs: { register: () => () => {} },
+    sidebarRight: { openTab() {}, openTabs: [], openResource: address => opened.push(address) },
+  }
+  plugin.apply(ctx)
+  const injected = body.inject('s1')
+  assert.equal(typeof injected.openFile, 'function')
+  injected.openFile('/work/repo/a b.txt')
+  injected.openFile('/x/档.txt')
+  // A session file address keeps the absolute path's leading slash and encodes
+  // each path segment, so spaces and non-ASCII names survive the round trip.
+  assert.deepEqual(opened, [
+    'dsh-resource://file/session/s1//work/repo/a%20b.txt',
+    'dsh-resource://file/session/s1//x/%E6%A1%A3.txt',
+  ])
+})
+
+test('a host without a resource opener leaves file rows passive', () => {
+  const plugin = loadClient()
+  let body
+  const ctx = {
+    effect: run => run(),
+    locale: { register: () => {}, bind: () => key => key },
+    slots: {
+      inject: (_name, run) => run(),
+      register: (definition) => {
+        if (definition.name === 'sidebar.right.pane.tab') body = definition
+        return () => {}
+      },
+    },
+    sidebarRightTabs: { register: () => () => {} },
+    sidebarRight: { openTab() {}, openTabs: [] },
+  }
+  plugin.apply(ctx)
+  assert.equal(body.inject('s1').openFile, undefined)
+})

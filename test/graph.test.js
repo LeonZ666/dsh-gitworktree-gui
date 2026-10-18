@@ -173,3 +173,35 @@ test('reference-only branch selection flows from the anchor toward its open endp
   render().find(el=>el.type==='button' && el.children.includes('graph.clear')).props.onClick()
   assert.equal(render().filter(el=>el.props?.className==='gw-flow').length, 0)
 })
+
+test('branch segments and reference tips report their node for the detail pane', () => {
+  const nodes = [
+    {sha:'a2',lane:1,parents:['a1'],parentLanes:[{sha:'a1',lane:1}]},
+    {sha:'a1',lane:1,parents:['main'],parentLanes:[{sha:'main',lane:0}]},
+    {sha:'main',lane:0,parents:['root'],parentLanes:[{sha:'root',lane:0}],isTrunk:true},
+    {sha:'root',lane:0,parents:[],parentLanes:[],isTrunk:true},
+  ].map((node,row)=>({...node,row,subject:'commit',refs:[]}))
+  const inspected = []
+  const render = interactiveGraph({
+    graph: { nodes, laneCount:2, rails:[{name:'feature',lane:1}] },
+    trunkBranch: 'main',
+    onInspectBranch: name => inspected.push(name),
+  })
+  render().find(el => el.props?.className === 'gw-segment').props.onClick()
+  assert.deepEqual(inspected, ['feature'])
+
+  let picked
+  const tipRender = interactiveGraph({
+    graph: {
+      nodes: [{sha:'abc',row:0,lane:0,parents:[],parentLanes:[],refs:[],subject:'initial'}],
+      laneCount: 2,
+      rails: [{name:'feature-a',lane:1,tip:'abc',sharedTip:true}],
+    },
+    worktrees: [{ branch:'feature-a', path:'/feature-a' }],
+    onPick: path => { picked = path },
+    onInspectWorktree: path => inspected.push(path),
+  })
+  tipRender().find(el => el.props?.key === 'ref-tip-feature-a').props.onClick()
+  assert.equal(picked, '/feature-a')
+  assert.ok(inspected.includes('/feature-a'))
+})

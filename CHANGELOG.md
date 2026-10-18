@@ -10,7 +10,7 @@ First public release.
 - Read-only branch/merge topology: straight trunk, one lane per branch, merges reconnect to the trunk, merged refs keep only a label.
 - Worktrees, uncommitted changes and the file tree in one pane; commit details with per-file diffs.
 - Path highlight with a flowing selection animation; keyboard selection.
-- Plugin market index (format 1) published under `docs/market/`.
+- Plugin market index (format 1) built by CI and deployed to GitHub Pages (not committed).
 
 ## 0.5.x — internal iterations
 

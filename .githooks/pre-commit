@@ -1,0 +1,8 @@
+#!/bin/sh
+# Reject staged generated artifacts before a commit. CI enforces the same rules;
+# this hook only gives earlier feedback and can be bypassed with --no-verify.
+set -e
+if ! command -v node >/dev/null 2>&1; then
+  exit 0
+fi
+exec node scripts/check-generated.mjs --staged

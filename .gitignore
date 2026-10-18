@@ -6,3 +6,4 @@ codex/dist/
 .claude/
 .npmrc.local
 _site/
+.artifacts/

@@ -20,21 +20,33 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           cache: npm
+      - name: Verify the tag names the merged version
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
       - run: npm ci
-      - run: npm run check
-      - run: npm test
+      - run: npm run verify
       - run: npm pack
       - name: Publish to npm
         run: |
           version="$(node -p "require('./package.json').version")"
           if npm view "dsh-gitworktree-gui@${version}" version >/dev/null 2>&1; then
             echo "dsh-gitworktree-gui@${version} is already on npm; skipping publish"
-          else
-            npm publish --access public --provenance
+            exit 0
           fi
+          case "$GITHUB_REF_NAME" in
+            *-*) npm publish --access public --provenance --tag next ;;
+            *) npm publish --access public --provenance ;;
+          esac
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" ./*.tgz --title "${GITHUB_REF_NAME}" --generate-notes
+        run: |
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "release ${GITHUB_REF_NAME} already exists"
+          else
+            gh release create "${GITHUB_REF_NAME}" ./*.tgz --title "${GITHUB_REF_NAME}" --generate-notes
+          fi

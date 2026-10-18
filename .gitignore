@@ -5,3 +5,4 @@ node_modules/
 codex/dist/
 .claude/
 .npmrc.local
+_site/

@@ -198,10 +198,10 @@ DSH 的 `cordis.patch.yml` 里可以为这一行补配置；两个键都可选�
 
 ```sh
 npm ci
-npm run check        # 语法检查
-npm test             # 构建 Codex 页面后跑 Node 回归
-npm run market:check # 校验市场索引（docs/market/index.json）
+npm run verify   # 语法检查 + 70 项 Node 回归 + 市场索引校验 + npm pack dry-run
 ```
+
+市场索引由 CI 在发布时生成到 `_site/` 并部署到 Pages，**不提交到仓库**；本地可用 `npm run market:index` 预览。发布流程见 [RELEASING.md](RELEASING.md)。
 
 当前 `npm test` 为 65 项，覆盖拓扑布局、路径选择、提交详情、轮询、并发与读取围栏。Codex 侧在合并前用内置浏览器验收过多分支、路径选择、悬停卡、提交详情和窄栏；DSH 侧已验证路由与注册；Claude 侧需要本机 `claude` 环境自行 `validate` / `test`。
 

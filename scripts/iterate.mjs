@@ -128,9 +128,16 @@ function start() {
     throw new Error('package-lock.json root version does not match; run npm install --package-lock-only')
   }
 
-  const changelog = readFileSync(join(root, 'CHANGELOG.md'), 'utf8')
+  const changelogPath = join(root, 'CHANGELOG.md')
+  let changelog = readFileSync(changelogPath, 'utf8')
+  const heading = `## ${version} — ${new Date().toISOString().slice(0, 10)}`
   if (!new RegExp(`^## ${version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'm').test(changelog)) {
-    throw new Error(`add a "## ${version} — YYYY-MM-DD" section to CHANGELOG.md, then re-run start`)
+    const firstEntry = changelog.indexOf('\n## ')
+    const stub = `${heading}\n\n### Added\n\n- TBD\n\n`
+    changelog = firstEntry === -1
+      ? `${changelog.trimEnd()}\n\n${stub}`
+      : `${changelog.slice(0, firstEntry + 1)}${stub}${changelog.slice(firstEntry + 1)}`
+    writeFileSync(changelogPath, changelog)
   }
 
   const hooks = attempt('git', ['config', '--get', 'core.hooksPath'])

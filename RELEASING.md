@@ -43,8 +43,8 @@ run `npm run iterate:finish` again from `main` to finish the tag/release step.
 - `major` — removed/renamed config or route, changed data contract, or a
   `engines.dsh` bump that drops older DSH versions.
 
-`iterate:start` bumps `package.json` and `package-lock.json` (npm does both) and
-refuses to start unless `CHANGELOG.md` already has a `## X.Y.Z` section.
+`iterate:start` bumps `package.json` and `package-lock.json` (npm does both)
+and inserts a `## X.Y.Z — YYYY-MM-DD` changelog stub when the section is missing.
 
 ## What CI does
 

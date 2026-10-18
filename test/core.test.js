@@ -58,8 +58,10 @@ describe('parsers', () => {
   })
 
   test('status v2 counts', () => {
-    const out = parseStatus('# branch.oid abc\n# branch.head main\n# branch.ab +2 -1\n1 M. N... 1 1 1 a b f\n1 .M N... 1 1 1 a b g\n? h\nu UU N... 1 1 1 1 a b c i\n')
+    const out = parseStatus('# branch.oid abc\n# branch.head main\n# branch.upstream origin/main\n# branch.ab +2 -1\n1 M. N... 1 1 1 a b f\n1 .M N... 1 1 1 a b g\n? h\nu UU N... 1 1 1 1 a b c i\n')
     assert.deepEqual([out.ahead, out.behind, out.staged, out.modified, out.untracked, out.conflicted], [2, 1, 1, 1, 1, 1])
+    assert.equal(out.upstream, 'origin/main')
+    assert.equal(parseStatus('# branch.head main\n').upstream, undefined)
   })
 
   test('changes: spaces, renames, and truncation is reported', () => {
@@ -169,6 +171,29 @@ describe('collectState', () => {
     sh(dir, 'worktree', 'lock', other)
     const body = await collectState(env, dir)
     assert.equal(body.worktrees.find((t) => t.path === other).group, 'locked')
+  })
+
+  test('branches and trees report the upstream and the remote branch count', async () => {
+    const dir = repo()
+    const remote = realpathSync(mkdtempSync(join(tmpdir(), 'gw-remote-')))
+    roots.push(remote)
+    sh(remote, 'init', '-q', '--bare')
+    sh(dir, 'remote', 'add', 'origin', remote)
+    sh(dir, 'push', '-q', '-u', 'origin', 'main')
+    writeFileSync(join(dir, 'b.txt'), 'b')
+    sh(dir, 'add', '.')
+    sh(dir, 'commit', '-q', '-m', 'two')
+    const body = await collectState(env, dir)
+    assert.equal(body.ok, true)
+    assert.equal(body.remoteBranchCount, 1)
+    const main = body.branches.find((branch) => branch.name === 'main')
+    assert.equal(main.upstream, 'origin/main')
+    assert.equal(main.ahead, 1)
+    assert.equal(main.behind, 0)
+    const tree = body.worktrees.find((item) => item.path === dir)
+    assert.equal(tree.upstream, 'origin/main')
+    assert.equal(tree.ahead, 1)
+    assert.equal(tree.behind, 0)
   })
 
   test('a session in a subdirectory selects the tree that contains it', async () => {

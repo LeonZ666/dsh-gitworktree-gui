@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="map-title map-desc">
+  <title id="map-title">DSH 侧栏面板结构</title>
+  <desc id="map-desc">左侧说明面板的三层结构；右侧是同一面板的示意：顶部为当前工作树信息条，中部为分支拓扑，底部为节点详情与其他工作树、改动和文件列表。</desc>
+
+  <rect width="1200" height="640" fill="#0d1117"/>
+
+  <!-- left: the three bands -->
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif">
+    <text x="56" y="78" fill="#8b949e" font-size="18" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="2">PANEL ANATOMY</text>
+    <text x="56" y="132" fill="#e6edf3" font-size="40" font-weight="700">一个侧栏，三层信息</text>
+    <text x="56" y="170" fill="#8b949e" font-size="21">不离开对话，读完分支、工作树与改动。</text>
+
+    <text x="56" y="238" fill="#d98a2b" font-size="20" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">01</text>
+    <text x="100" y="242" fill="#e6edf3" font-size="26" font-weight="600">顶部 · 当前工作树</text>
+    <text x="100" y="276" fill="#8b949e" font-size="20">路径、分支或 detached HEAD、</text>
+    <text x="100" y="302" fill="#8b949e" font-size="20">ahead/behind、clean · dirty · conflict</text>
+    <text x="100" y="328" fill="#8b949e" font-size="20">以及全局计数。</text>
+
+    <text x="56" y="384" fill="#d98a2b" font-size="20" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">02</text>
+    <text x="100" y="388" fill="#e6edf3" font-size="26" font-weight="600">中部 · 分支拓扑</text>
+    <text x="100" y="422" fill="#8b949e" font-size="20">主干竖直、分支向右；点线高亮</text>
+    <text x="100" y="448" fill="#8b949e" font-size="20">整条路径，合并收回主干。</text>
+
+    <text x="56" y="504" fill="#d98a2b" font-size="20" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">03</text>
+    <text x="100" y="508" fill="#e6edf3" font-size="26" font-weight="600">底部 · 详情与列表</text>
+    <text x="100" y="542" fill="#8b949e" font-size="20">点提交 / 分支 / 工作树看详情；</text>
+    <text x="100" y="568" fill="#8b949e" font-size="20">文件行点开新 tab，其余树在这里。</text>
+
+    <circle cx="66" cy="606" r="4" fill="#3fb950"/>
+    <text x="82" y="612" fill="#8b949e" font-size="19" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">只读 · 不 checkout · 不切目录</text>
+  </g>
+
+  <!-- right: the panel -->
+  <rect x="470" y="56" width="680" height="548" rx="16" fill="#161b22" stroke="#30363d"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif">
+    <!-- band 1 -->
+    <text x="492" y="88" fill="#d98a2b" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">01</text>
+    <text x="492" y="118" fill="#e6edf3" font-size="24" font-weight="600">dsh-gitworktree-gui</text>
+    <circle cx="1080" cy="109" r="4" fill="#3fb950"/>
+    <text x="1094" y="115" fill="#8b949e" font-size="18">实时</text>
+
+    <text x="492" y="152" fill="#8b949e" font-size="19" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">~/repo/dsh-gitworktree-gui</text>
+
+    <rect x="492" y="168" width="196" height="30" rx="7" fill="none" stroke="#30363d"/>
+    <text x="504" y="189" fill="#e6edf3" font-size="19" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">feature/sidebar</text>
+
+    <rect x="700" y="168" width="78" height="30" rx="7" fill="none" stroke="#d98a2b"/>
+    <text x="716" y="189" fill="#d98a2b" font-size="19">dirty</text>
+    <text x="792" y="189" fill="#8b949e" font-size="19" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">↑2 ↓0</text>
+    <text x="492" y="222" fill="#8b949e" font-size="18">本地分支 4 · 远程分支 2 · Worktree 3</text>
+
+    <line x1="470" y1="236" x2="1150" y2="236" stroke="#30363d"/>
+
+    <!-- band 2 -->
+    <text x="492" y="266" fill="#d98a2b" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">02</text>
+
+    <g font-size="17" fill="#8b949e">
+      <line x1="868" y1="260" x2="886" y2="260" stroke="#c9d1d9" stroke-width="3"/>
+      <text x="894" y="266">主干 main</text>
+      <line x1="982" y1="260" x2="1000" y2="260" stroke="#d98a2b" stroke-width="3"/>
+      <text x="1008" y="266">分支</text>
+      <line x1="1050" y1="260" x2="1068" y2="260" stroke="#3fb950" stroke-width="3"/>
+      <text x="1076" y="266">当前</text>
+    </g>
+
+    <!-- topology: trunk + one branch + current tip -->
+    <line x1="560" y1="404" x2="560" y2="278" stroke="#c9d1d9" stroke-width="3" stroke-linecap="round"/>
+    <path d="M560 366 C 600 366 640 354 640 326 L640 292" fill="none" stroke="#3fb950" stroke-width="3" stroke-linecap="round"/>
+
+    <g fill="#c9d1d9">
+      <circle cx="560" cy="394" r="5"/>
+      <circle cx="560" cy="354" r="5"/>
+      <circle cx="560" cy="314" r="5"/>
+    </g>
+    <circle cx="560" cy="278" r="6" fill="#161b22" stroke="#e6edf3" stroke-width="2.5"/>
+    <g fill="#3fb950">
+      <circle cx="640" cy="326" r="5"/>
+    </g>
+    <circle cx="640" cy="292" r="6" fill="#161b22" stroke="#3fb950" stroke-width="2.5"/>
+
+    <g font-size="19" fill="#e6edf3">
+      <text x="690" y="400">feat: add detail pane</text>
+      <text x="690" y="360">fix: keep top band short</text>
+      <text x="690" y="320">merge: iteration v0.7.0</text>
+      <text x="690" y="284">docs: readme</text>
+    </g>
+
+    <line x1="470" y1="428" x2="1150" y2="428" stroke="#30363d"/>
+
+    <!-- band 3 -->
+    <text x="492" y="458" fill="#d98a2b" font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">03</text>
+
+    <rect x="492" y="474" width="326" height="112" rx="10" fill="#0d1117" stroke="#30363d"/>
+    <text x="508" y="500" fill="#e6edf3" font-size="19" font-weight="600">工作树详情</text>
+    <g font-size="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+      <text x="508" y="528" fill="#8b949e">路径</text>
+      <text x="560" y="528" fill="#c9d1d9">~/repo/wt-feature</text>
+      <text x="508" y="552" fill="#8b949e">HEAD</text>
+      <text x="560" y="552" fill="#c9d1d9">a1b2c3d</text>
+      <text x="508" y="576" fill="#8b949e">上游</text>
+      <text x="560" y="576" fill="#c9d1d9">origin/feature/sidebar</text>
+    </g>
+
+    <g font-size="18" fill="#8b949e" letter-spacing="1">
+      <text x="852" y="502">WORKTREES</text>
+      <text x="852" y="540">CHANGES</text>
+      <text x="852" y="578">FILES</text>
+    </g>
+    <g font-size="16" fill="#c9d1d9">
+      <rect x="1088" y="486" width="30" height="20" rx="10" fill="#0d1117" stroke="#30363d"/>
+      <text x="1103" y="501" text-anchor="middle">2</text>
+      <rect x="1088" y="524" width="30" height="20" rx="10" fill="#0d1117" stroke="#30363d"/>
+      <text x="1103" y="539" text-anchor="middle">5</text>
+      <rect x="1088" y="562" width="30" height="20" rx="10" fill="#0d1117" stroke="#30363d"/>
+      <text x="1103" y="577" text-anchor="middle">6</text>
+    </g>
+    <line x1="852" y1="512" x2="1122" y2="512" stroke="#30363d"/>
+    <line x1="852" y1="550" x2="1122" y2="550" stroke="#30363d"/>
+    <line x1="852" y1="588" x2="1122" y2="588" stroke="#30363d"/>
+  </g>
+</svg>

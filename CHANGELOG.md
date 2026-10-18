@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.0 — 2026-10-19
+
+### Added
+
+- Three-band panel layout: a top band for the worktree being viewed (path, branch or `detached @ <sha>`, main badge, ahead/behind, clean / dirty / conflict with the dirty breakdown, and the `local · remote · worktrees` counts), the topology in the middle, and a detail pane plus the other worktrees, changes and file sections below. The viewed worktree is not repeated in the bottom list, and a single-worktree repository shows no WORKTREES section.
+- Clicking a commit, a branch rail/ref, or a linked worktree opens its details in the bottom pane; worktree and branch details report path, HEAD commit, upstream, tracking counts, dirty count and merge state, with shortcuts to switch worktree or open the tip commit.
+- Clicking a file in CHANGES or FILES opens it in a new Sidebar tab through the built-in document preview (`dsh-resource://file/session/<sessionId>/<absolute path>`), with keyboard activation and a pointer affordance; the adapters without that registry keep the rows passive.
+- `lib/core.js` reports branch upstream tracking (`upstream`, `ahead`, `behind`), each worktree's `upstream`, and `remoteBranchCount` for the top band counts.
+
 ## 0.6.0 — 2026-10-18
 
 First public release.

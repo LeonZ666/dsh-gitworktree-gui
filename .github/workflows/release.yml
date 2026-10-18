@@ -25,7 +25,13 @@ jobs:
       - run: npm test
       - run: npm pack
       - name: Publish to npm
-        run: npm publish --access public --provenance
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if npm view "dsh-gitworktree-gui@${version}" version >/dev/null 2>&1; then
+            echo "dsh-gitworktree-gui@${version} is already on npm; skipping publish"
+          else
+            npm publish --access public --provenance
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Rebuild the market index with this release

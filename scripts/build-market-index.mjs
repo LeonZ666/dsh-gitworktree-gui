@@ -47,18 +47,21 @@ function readPrevious() {
 
 /** Unix seconds of this version's npm publish, retrying while the registry catches up. */
 function publishTimestamp(previous) {
-  const known = previous?.plugins?.[0]?.versions?.find(version => version.version === pkg.version)
+  const known = fromNpm
+    ? undefined
+    : previous?.plugins?.[0]?.versions?.find(version => version.version === pkg.version)
   if (known) return known.publishTimestamp
   if (!fromNpm) return Math.floor(Date.now() / 1000)
   for (let attempt = 0; attempt < 30; attempt += 1) {
     try {
-      const printed = execFileSync('npm', ['view', `${pkg.name} time.${pkg.version}`, '--json'], {
+      const printed = execFileSync('npm', ['view', pkg.name, 'time', '--json'], {
         encoding: 'utf8',
         env: { ...process.env, NPM_CONFIG_CACHE: process.env.NPM_CONFIG_CACHE ?? resolve(root, '.tmp-npm-cache') },
       }).trim()
-      const parsed = JSON.parse(printed)
-      if (typeof parsed === 'string' && !Number.isNaN(Date.parse(parsed))) {
-        return Math.floor(Date.parse(parsed) / 1000)
+      const times = JSON.parse(printed)
+      const iso = times?.[pkg.version]
+      if (typeof iso === 'string' && !Number.isNaN(Date.parse(iso))) {
+        return Math.floor(Date.parse(iso) / 1000)
       }
     } catch {}
     execFileSync('sleep', ['3'])

@@ -69,13 +69,18 @@
   },
   "scripts": {
     "test": "npm run build:codex && node --test test/*.test.js",
-    "check": "node --check index.js && node --check client.js && node --check lib/core.js && node --check lib/glyphs.js && node --check codex/server.mjs && node --check codex/scripts/start.mjs && node --check codex/frontend.js && node --check scripts/build-market-index.mjs && node --check scripts/market-index-lib.mjs && node --check scripts/verify-pack.mjs",
-    "verify": "npm run check && npm test && npm run market:check && node scripts/verify-pack.mjs",
+    "check": "node --check index.js && node --check client.js && node --check lib/core.js && node --check lib/glyphs.js && node --check codex/server.mjs && node --check codex/scripts/start.mjs && node --check codex/frontend.js && node --check scripts/build-market-index.mjs && node --check scripts/market-index-lib.mjs && node --check scripts/verify-pack.mjs && node --check scripts/iterate.mjs && node --check scripts/check-generated.mjs && node --check scripts/generated-paths.mjs",
+    "verify": "npm run check && npm run check:generated && npm test && npm run market:check && node scripts/verify-pack.mjs",
     "build:codex": "node scripts/build-codex.mjs",
     "panel": "node codex/scripts/start.mjs",
     "market:index": "node scripts/build-market-index.mjs",
     "market:check": "node scripts/build-market-index.mjs --check",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "check:generated": "node scripts/check-generated.mjs",
+    "iterate:start": "node scripts/iterate.mjs start",
+    "iterate:context": "node scripts/iterate.mjs context",
+    "iterate:artifact": "node scripts/iterate.mjs artifact",
+    "iterate:finish": "node scripts/iterate.mjs finish"
   },
   "engines": {
     "node": ">=20",

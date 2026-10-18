@@ -59,7 +59,7 @@ plugin_manager action=install_bundle target=dsh-gitworktree-gui
 | --- | --- |
 | `dsh-gitworktree-gui` | npm 上的已发布版本 |
 | `git+https://github.com/LeonZ666/dsh-gitworktree-gui.git` | 直接安装当前 `main`（不要用 `github:` 简写，匿名用户会走 SSH） |
-| `/绝对路径/dsh-gitworktree-gui-0.6.0.tgz` | 离线包，仓库根执行 `npm pack` 得到 |
+| `/绝对路径/dsh-gitworktree-gui-<版本>.tgz` | 离线包，仓库根执行 `npm pack` 得到 |
 | `/绝对路径/dsh-gitworktree-gui` | 本地源码，`link:` 安装，改代码即时生效 |
 
 非桌面 profile 也可以用终端：
@@ -198,12 +198,14 @@ DSH 的 `cordis.patch.yml` 里可以为这一行补配置；两个键都可选�
 
 ```sh
 npm ci
-npm run verify   # 语法检查 + 70 项 Node 回归 + 市场索引校验 + npm pack dry-run
+npm run verify   # 语法检查 + 生成物检查 + Node 回归 + 市场索引校验 + npm pack dry-run
 ```
 
-市场索引由 CI 在发布时生成到 `_site/` 并部署到 Pages，**不提交到仓库**；本地可用 `npm run market:index` 预览。发布流程见 [RELEASING.md](RELEASING.md)。
+市场索引由 CI 在发布时生成到 `_site/` 并部署到 Pages，**不提交到仓库**；本地可用 `npm run market:index` 预览。
 
-当前 `npm test` 为 65 项，覆盖拓扑布局、路径选择、提交详情、轮询、并发与读取围栏。Codex 侧在合并前用内置浏览器验收过多分支、路径选择、悬停卡、提交详情和窄栏；DSH 侧已验证路由与注册；Claude 侧需要本机 `claude` 环境自行 `validate` / `test`。
+每次版本迭代用一条分支与一个 PR：`npm run iterate:start -- <版本> [slug]`，细节见 [RELEASING.md](RELEASING.md)。迭代产物写在 `.artifacts/<版本>/`（已忽略），迭代上下文写在 `iterations/<版本>.md`（跟踪）。
+
+当前 `npm test` 为 78 项，覆盖拓扑布局、路径选择、提交详情、轮询、并发与读取围栏。Codex 侧在合并前用内置浏览器验收过多分支、路径选择、悬停卡、提交详情和窄栏；DSH 侧已验证路由与注册；Claude 侧需要本机 `claude` 环境自行 `validate` / `test`。
 
 包目录里是同一份源码的三个入口：DSH（根目录）、Codex（[`codex/`](codex/)）、Claude（[`.claude-plugin/`](.claude-plugin/) + [`hooks/`](hooks/)）。`npm pack` 只带运行所需文件，可直接作为上面的 tarball target 安装。
 

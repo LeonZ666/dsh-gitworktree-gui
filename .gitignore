@@ -4,3 +4,4 @@ node_modules/
 .tmp-*/
 codex/dist/
 .claude/
+.npmrc.local
